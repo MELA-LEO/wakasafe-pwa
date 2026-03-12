@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMap } from '@/lib/map-context'
 import { AlertTriangle, AlertCircle, Zap, CheckCircle2, MapPin } from 'lucide-react'
 
@@ -55,28 +55,25 @@ export function MapView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>()
-  const [userLocation, setUserLocation] = useRef<{ lat: number; lng: number } | null>(null)
-  const [isLocating, setIsLocating] = useRef(false)
+  const userLocationRef = useRef<{ lat: number; lng: number } | null>(null)
+  const isLocatingRef = useRef(false)
+  const [, forceUpdate] = useState(0)
 
   // Get user's current location
   const handleLocateMe = () => {
-    if (isLocating.current) return
-    isLocating.current = true
+    if (isLocatingRef.current) return
+    isLocatingRef.current = true
 
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords
-          userLocation.current = { lat: latitude, lng: longitude }
-          isLocating.current = false
-          // Trigger re-render by forcing animation frame
-          if (animationRef.current) {
-            cancelAnimationFrame(animationRef.current)
-            animationRef.current = requestAnimationFrame(render)
-          }
+          userLocationRef.current = { lat: latitude, lng: longitude }
+          isLocatingRef.current = false
+          forceUpdate(n => n + 1)
         },
         () => {
-          isLocating.current = false
+          isLocatingRef.current = false
         }
       )
     }
@@ -190,8 +187,8 @@ export function MapView() {
       ctx.fill()
 
       // User location marker
-      if (userLocation.current) {
-        const userCoords = latLngToCanvasCoords(userLocation.current.lat, userLocation.current.lng, width, height)
+      if (userLocationRef.current) {
+        const userCoords = latLngToCanvasCoords(userLocationRef.current.lat, userLocationRef.current.lng, width, height)
         
         // Pulsing glow effect
         const now = Date.now()
