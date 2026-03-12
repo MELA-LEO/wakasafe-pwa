@@ -165,6 +165,7 @@ export function ReportGrid() {
             </div>
           </div>
         )}
+      </div>
     </div>
   )
 }
