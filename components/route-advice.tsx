@@ -15,6 +15,8 @@ const SOUTHEAST_CITIES = [
   'Nsukka',
   'Abakaliki',
   'Calabar',
+  'Okigwe',
+  'Uturu',
   'Ogbomosho',
   'Warri',
 ]
@@ -33,7 +35,7 @@ interface Route {
 export function RouteAdvice() {
   const { t } = useLanguage()
   const { highways } = useMap()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [fromCity, setFromCity] = useState('Aba')
   const [toCity, setToCity] = useState('Onitsha')
   const [showFromDropdown, setShowFromDropdown] = useState(false)
@@ -87,8 +89,20 @@ export function RouteAdvice() {
   }
 
   return (
-    <div className="fixed top-24 left-0 right-0 px-4 z-[250]">
-      <div className="glass-dark rounded-2xl p-6 max-w-2xl mx-auto space-y-4">
+    <>
+      {/* Collapse Button */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed left-4 top-1/2 transform -translate-y-1/2 z-[250] glass-dark rounded-full p-3 hover:bg-slate-700/40 transition-all"
+        >
+          <Navigation className="w-6 h-6 text-blue-400" />
+        </button>
+      )}
+
+      {/* Drawer */}
+      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-[250] max-w-sm max-h-96 overflow-y-auto">
+        <div className={`glass-dark rounded-2xl p-6 space-y-4 transition-all ${!isOpen ? 'hidden' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-white flex items-center gap-2">
@@ -217,7 +231,8 @@ export function RouteAdvice() {
             })}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
