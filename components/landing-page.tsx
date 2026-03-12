@@ -72,7 +72,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <Link href="/auth/onboarding" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto h-12 text-base bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
                 Get Started →
