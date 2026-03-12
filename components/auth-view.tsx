@@ -259,10 +259,9 @@ export function AuthView() {
                   </div>
                 )}
               </TabsContent>
-            </TabsContent>
 
-            {/* Google Tab */}
-            <TabsContent value="google" className="space-y-4 mt-6">
+              {/* Google Tab */}
+              <TabsContent value="google" className="space-y-4 mt-6">
               <Button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
