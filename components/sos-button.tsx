@@ -6,78 +6,26 @@ import { useLanguage } from '@/lib/language-context'
 import { AlertTriangle, X } from 'lucide-react'
 
 export function SOSButton() {
-  const { user, addEmergencyContact } = useAuth()
+  const { user } = useAuth()
   const { t } = useLanguage()
   const [isActive, setIsActive] = useState(false)
-  const [pressProgress, setPressProgress] = useState(0)
-  const pressTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const pressStartRef = useRef<number | null>(null)
-
-  const handleMouseDown = () => {
-    pressStartRef.current = Date.now()
-    let accumulated = 0
-
-    pressTimerRef.current = setInterval(() => {
-      accumulated += 50
-      const progress = Math.min((accumulated / 3000) * 100, 100)
-      setPressProgress(progress)
-
-      if (progress >= 100) {
-        if (pressTimerRef.current) {
-          clearInterval(pressTimerRef.current)
-        }
-        triggerSOS()
-      }
-    }, 50)
-  }
-
-  const handleMouseUp = () => {
-    if (pressTimerRef.current) {
-      clearInterval(pressTimerRef.current)
-    }
-    if (pressProgress < 100) {
-      setPressProgress(0)
-    }
-  }
-
-  const handleTouchStart = () => {
-    handleMouseDown()
-  }
-
-  const handleTouchEnd = () => {
-    handleMouseUp()
-  }
 
   const triggerSOS = async () => {
     setIsActive(true)
-    setPressProgress(0)
-
-    // Simulate sending SOS alert
-    console.log('[v0] SOS Button Activated')
-    console.log('[v0] Location:', user?.lastLocation)
-    console.log('[v0] Emergency Contacts:', user?.emergencyContacts)
-
-    // Keep SOS active for 5 seconds
-    setTimeout(() => {
-      setIsActive(false)
-    }, 5000)
   }
 
   const deactivateSOS = () => {
     setIsActive(false)
-    setPressProgress(0)
-    if (pressTimerRef.current) {
-      clearInterval(pressTimerRef.current)
-    }
   }
 
   useEffect(() => {
-    return () => {
-      if (pressTimerRef.current) {
-        clearInterval(pressTimerRef.current)
-      }
+    if (isActive) {
+      const timer = setTimeout(() => {
+        setIsActive(false)
+      }, 5000)
+      return () => clearTimeout(timer)
     }
-  }, [])
+  }, [isActive])
 
   return (
     <>
@@ -94,11 +42,7 @@ export function SOSButton() {
 
           {/* Main button */}
           <button
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
+            onClick={triggerSOS}
             disabled={isActive}
             className={`relative w-full h-full rounded-full font-bold text-white transition-all transform ${
               isActive
@@ -106,41 +50,12 @@ export function SOSButton() {
                 : 'bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
             }`}
           >
-            {/* Progress ring SVG */}
-            {!isActive && pressProgress > 0 && (
-              <svg className="absolute inset-0" width="80" height="80">
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeOpacity="0.3"
-                  style={{
-                    strokeDasharray: `${2 * Math.PI * 35}`,
-                    strokeDashoffset: `${2 * Math.PI * 35 * (1 - pressProgress / 100)}`,
-                    transform: 'rotate(-90deg)',
-                    transformOrigin: '50% 50%',
-                    transition: 'stroke-dashoffset 0.05s linear',
-                  }}
-                />
-              </svg>
-            )}
-
             {/* Button content */}
             <div className="flex flex-col items-center justify-center h-full gap-1">
               <AlertTriangle className="w-6 h-6" />
               <span className="text-xs font-bold">SOS</span>
             </div>
           </button>
-
-          {/* Time indicator */}
-          {!isActive && pressProgress > 0 && (
-            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-red-400 font-medium">
-              {Math.round(pressProgress / 100 * 3)}s
-            </div>
-          )}
         </div>
       </div>
 
