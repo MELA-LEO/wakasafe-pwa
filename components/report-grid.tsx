@@ -12,9 +12,9 @@ import {
   HelpCircle,
   Send,
   X,
+  MessageSquare,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 
 export type ReportType = 'robbery' | 'checkpoint' | 'accident' | 'hazard' | 'traffic' | 'other'
 
@@ -28,6 +28,7 @@ interface ReportOption {
 export function ReportGrid() {
   const { t } = useLanguage()
   const { addIncident } = useMap()
+  const [isOpen, setIsOpen] = useState(false)
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null)
   const [details, setDetails] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -88,67 +89,90 @@ export function ReportGrid() {
         setSelectedReport(null)
         setDetails('')
         setIsSubmitting(false)
+        setIsOpen(false)
       }, 500)
     }
   }
 
   return (
-    <div className="fixed bottom-48 right-4 z-[250] max-w-sm">
-      <div>
-        {/* Report Grid Modal */}
-        {selectedReport ? (
-          <div className="glass-dark rounded-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-white">Report Details</h3>
+    <>
+      {/* Report Button */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed right-4 bottom-32 z-[250] glass-dark rounded-full p-3 hover:bg-slate-700/40 transition-all"
+        >
+          <MessageSquare className="w-6 h-6 text-amber-400" />
+        </button>
+      )}
+
+      {/* Report Drawer */}
+      <div className="fixed right-4 bottom-32 z-[250] max-w-sm max-h-96 overflow-y-auto">
+        <div className={`glass-dark rounded-2xl p-6 space-y-4 transition-all ${!isOpen ? 'hidden' : ''}`}>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-white">Quick Report</h3>
+            <button
+              onClick={() => {
+                setIsOpen(false)
+                setSelectedReport(null)
+                setDetails('')
+              }}
+              className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
+
+          {selectedReport ? (
+            /* Report Details Form */
+            <>
+              {/* Selected Report Type */}
+              <div className="flex items-center gap-3 bg-slate-700/30 rounded-lg p-3">
+                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${reportOptions.find((r) => r.id === selectedReport)?.color} flex items-center justify-center text-white`}>
+                  {reportOptions.find((r) => r.id === selectedReport)?.icon}
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400">Reporting</p>
+                  <p className="font-semibold text-white">{reportOptions.find((r) => r.id === selectedReport)?.label}</p>
+                </div>
+              </div>
+
+              {/* Details Input */}
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300 font-medium">Describe what you saw</label>
+                <textarea
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder="Provide details to help other road users stay safe..."
+                  className="w-full glass-dark rounded-lg px-3 py-3 text-sm text-white placeholder-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-green-500 h-20"
+                />
+                <p className="text-xs text-slate-500">{details.length}/200 characters</p>
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                onClick={handleReportSubmit}
+                disabled={!details.trim() || isSubmitting}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 disabled:opacity-50"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {isSubmitting ? 'Sending...' : 'Report'}
+              </Button>
+
+              {/* Back Button */}
               <button
                 onClick={() => {
                   setSelectedReport(null)
                   setDetails('')
                 }}
-                className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+                className="w-full text-sm text-slate-400 hover:text-slate-300 py-2 transition-colors"
               >
-                <X className="w-5 h-5 text-slate-400" />
+                Back
               </button>
-            </div>
-
-            {/* Selected Report Type */}
-            <div className="flex items-center gap-3 bg-slate-700/30 rounded-lg p-3">
-              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${reportOptions.find((r) => r.id === selectedReport)?.color} flex items-center justify-center text-white`}>
-                {reportOptions.find((r) => r.id === selectedReport)?.icon}
-              </div>
-              <div>
-                <p className="text-sm text-slate-400">Reporting</p>
-                <p className="font-semibold text-white">{reportOptions.find((r) => r.id === selectedReport)?.label}</p>
-              </div>
-            </div>
-
-            {/* Details Input */}
-            <div className="space-y-2">
-              <label className="text-sm text-slate-300 font-medium">Describe what you saw</label>
-              <textarea
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                placeholder="Provide details to help other road users stay safe..."
-                className="w-full glass-dark rounded-lg px-3 py-3 text-sm text-white placeholder-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-green-500 h-24"
-              />
-              <p className="text-xs text-slate-500">{details.length}/200 characters</p>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              onClick={handleReportSubmit}
-              disabled={!details.trim() || isSubmitting}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 disabled:opacity-50"
-            >
-              <Send className="w-4 h-4 mr-2" />
-              {isSubmitting ? 'Sending...' : 'Report Incident'}
-            </Button>
-          </div>
-        ) : (
-          /* Report Grid */
-          <div className="glass-dark rounded-2xl p-6 space-y-4">
-            <h3 className="font-semibold text-white">Quick Report</h3>
+            </>
+          ) : (
+            /* Report Grid */
             <div className="grid grid-cols-3 gap-3">
               {reportOptions.map((option) => (
                 <button
@@ -163,9 +187,9 @@ export function ReportGrid() {
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -7,6 +7,16 @@ import { AlertTriangle, AlertCircle, Zap, CheckCircle2, MapPin } from 'lucide-re
 const ABA_CENTER = { lat: 5.1098, lng: 7.3667 }
 const MAP_BOUNDS = { minLat: 4.8, maxLat: 5.4, minLng: 7.0, maxLng: 7.7 }
 
+// Junction points with names for realistic map
+const JUNCTIONS = [
+  { lat: 5.1098, lng: 7.3667, name: 'Aba City Center' },
+  { lat: 5.15, lng: 7.35, name: 'Port Harcourt Junction' },
+  { lat: 5.08, lng: 7.38, name: 'Onitsha Road' },
+  { lat: 5.12, lng: 7.32, name: 'Umuahia Junction' },
+  { lat: 5.05, lng: 7.40, name: 'Okigwe Interchange' },
+  { lat: 5.20, lng: 7.30, name: 'Uturu Bypass' },
+]
+
 function getSeverityColor(severity: string): string {
   switch (severity) {
     case 'high':
@@ -109,7 +119,38 @@ export function MapView() {
         ctx.stroke()
       })
 
-      // Center marker
+      // Draw junctions with labels and location arrows
+      JUNCTIONS.forEach((junction, index) => {
+        const coords = latLngToCanvasCoords(junction.lat, junction.lng, width, height)
+        
+        // Draw location arrow (triangle pointing up)
+        ctx.fillStyle = '#06b6d4'
+        ctx.globalAlpha = 0.8
+        ctx.beginPath()
+        ctx.moveTo(coords.x, coords.y - 12)
+        ctx.lineTo(coords.x - 8, coords.y + 4)
+        ctx.lineTo(coords.x + 8, coords.y + 4)
+        ctx.closePath()
+        ctx.fill()
+        
+        // Draw circle around junction
+        ctx.strokeStyle = '#06b6d4'
+        ctx.lineWidth = 1.5
+        ctx.globalAlpha = 0.5
+        ctx.beginPath()
+        ctx.arc(coords.x, coords.y, 12, 0, Math.PI * 2)
+        ctx.stroke()
+        
+        // Junction label
+        ctx.globalAlpha = 1
+        ctx.fillStyle = '#0891b2'
+        ctx.font = '11px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.fillText(junction.name, coords.x, coords.y + 16)
+      })
+
+      // Center marker (Aba)
       const centerCoords = latLngToCanvasCoords(ABA_CENTER.lat, ABA_CENTER.lng, width, height)
       ctx.fillStyle = '#3b82f6'
       ctx.globalAlpha = 0.3

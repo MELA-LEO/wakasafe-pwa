@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
             {/* User Info */}
             <div className="space-y-3 flex-1">
-              <h2 className="text-3xl font-bold text-white">Hello, Safe Driver! 👋</h2>
+              <h2 className="text-3xl font-bold text-white">Hello, {user.name}!</h2>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-slate-400">{user.phone}</span>
                 <div className="flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/50 rounded-full px-3 py-1">
