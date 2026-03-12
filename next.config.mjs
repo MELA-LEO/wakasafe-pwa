@@ -1,24 +1,10 @@
 /** @type {import('next').NextConfig} */
-// WAKASAFE PWA Configuration
 const nextConfig = {
-  experimental: {
-    reactCompiler: false,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'api.mapbox.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'tiles.stadiamaps.com',
-      },
-    ],
   },
   headers: async () => {
     return [
