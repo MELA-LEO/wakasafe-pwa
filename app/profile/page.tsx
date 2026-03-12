@@ -45,24 +45,89 @@ export default function ProfilePage() {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
-        {/* Profile Info */}
-        <div className="glass-dark rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-white">{t('profile')}</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs text-slate-400 uppercase">Phone</label>
-              <p className="text-white font-medium">{user.phone}</p>
-            </div>
-            <div>
-              <label className="text-xs text-slate-400 uppercase">{t('safetyScore')}</label>
-              <div className="flex items-center gap-4 mt-1">
-                <div className="flex-1 bg-slate-800 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
-                    style={{ width: `${user.safetyScore}%` }}
-                  />
+        {/* Profile Header Card */}
+        <div className="glass-dark rounded-2xl p-8 space-y-6">
+          {/* User Info with Verified Badge */}
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold text-white">Safe Driver</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-400">{user.phone}</span>
+                <div className="flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/50 rounded-full px-3 py-1">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                  <span className="text-xs font-semibold text-emerald-300">Verified</span>
                 </div>
-                <span className="text-white font-bold">{user.safetyScore}/100</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Safety Score with Progress Ring */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Safety Score */}
+            <div className="space-y-3">
+              <label className="text-xs text-slate-400 uppercase font-semibold">{t('safetyScore')}</label>
+              <div className="relative w-32 h-32">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-slate-700"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray={`${(user.safetyScore / 100) * 282.7} 282.7`}
+                    className="text-green-500 transition-all"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-400">{user.safetyScore}</div>
+                    <div className="text-xs text-slate-400">/100</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Safety Contribution */}
+            <div className="space-y-3">
+              <label className="text-xs text-slate-400 uppercase font-semibold">Safety Contribution</label>
+              <div className="relative w-32 h-32">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-slate-700"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray={`${(72 / 100) * 282.7} 282.7`}
+                    className="text-blue-500 transition-all"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-400">72</div>
+                    <div className="text-xs text-slate-400">reports</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

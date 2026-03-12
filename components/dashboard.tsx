@@ -8,6 +8,8 @@ import { MapProvider } from '@/lib/map-context'
 import { MapView } from './map-view'
 import { WakaSheet } from './waka-sheet'
 import { SOSButton } from './sos-button'
+import { ReportGrid } from './report-grid'
+import { RouteAdvice } from './route-advice'
 import { LanguageSwitcher } from './language-switcher'
 import { Button } from '@/components/ui/button'
 import { Menu, LogOut, User, Settings } from 'lucide-react'
@@ -120,6 +122,12 @@ export function Dashboard() {
 
             {/* Waka Sheet */}
             <WakaSheet />
+
+            {/* Report Grid */}
+            <ReportGrid />
+
+            {/* Route Advice */}
+            <RouteAdvice />
 
             {/* SOS Button */}
             <SOSButton />

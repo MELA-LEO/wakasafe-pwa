@@ -6,10 +6,10 @@ export interface IncidentMarker {
   id: string
   lat: number
   lng: number
-  type: 'accident' | 'traffic' | 'hazard' | 'checkpoint'
+  type: 'accident' | 'traffic' | 'hazard' | 'checkpoint' | 'robbery' | 'other'
   severity: 'low' | 'medium' | 'high'
   description: string
-  timestamp: number
+  timestamp: Date | number
 }
 
 export interface HighwaySegment {
