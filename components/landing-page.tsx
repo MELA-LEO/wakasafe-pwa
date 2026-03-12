@@ -2,13 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useLanguage } from '@/lib/language-context'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, MapPin, Shield, Zap } from 'lucide-react'
 
 export function LandingPage() {
-  const { t } = useLanguage()
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Background gradient overlay */}
@@ -34,6 +31,9 @@ export function LandingPage() {
               </a>
               <a href="#about" className="hover:text-slate-200 transition-colors">
                 About
+              </a>
+              <a href="#plans" className="hover:text-slate-200 transition-colors">
+                Plans
               </a>
             </nav>
           </div>
