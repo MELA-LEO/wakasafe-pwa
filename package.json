@@ -11,8 +11,6 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@vercel/analytics": "1.6.1",
-    "leaflet": "^1.9.4",
-    "react-leaflet": "^4.2.3",
     "firebase": "^11.0.2",
     "@react-oauth/google": "^0.12.1",
     "zustand": "^4.5.5",
