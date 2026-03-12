@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 // WAKASAFE PWA Configuration
 const nextConfig = {
+  experimental: {
+    reactCompiler: false,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
