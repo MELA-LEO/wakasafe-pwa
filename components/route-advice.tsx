@@ -3,7 +3,21 @@
 import { useState } from 'react'
 import { useLanguage } from '@/lib/language-context'
 import { useMap } from '@/lib/map-context'
-import { MapPin, TrendingDown, Navigation, Search, X } from 'lucide-react'
+import { MapPin, TrendingDown, Navigation, ArrowRight, ChevronDown } from 'lucide-react'
+
+const SOUTHEAST_CITIES = [
+  'Aba',
+  'Onitsha',
+  'Port Harcourt',
+  'Enugu',
+  'Umuahia',
+  'Owerri',
+  'Nsukka',
+  'Abakaliki',
+  'Calabar',
+  'Ogbomosho',
+  'Warri',
+]
 
 interface Route {
   id: string
@@ -14,192 +28,196 @@ interface Route {
   safetyScore: number
   incidents: number
   color: 'green' | 'red' | 'yellow'
-  coordinates: Array<[number, number]>
 }
 
 export function RouteAdvice() {
   const { t } = useLanguage()
+  const { highways } = useMap()
   const [isOpen, setIsOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedRoute, setSelectedRoute] = useState<string | null>(null)
+  const [fromCity, setFromCity] = useState('Aba')
+  const [toCity, setToCity] = useState('Onitsha')
+  const [showFromDropdown, setShowFromDropdown] = useState(false)
+  const [showToDropdown, setShowToDropdown] = useState(false)
 
-  const mockRoutes: Route[] = [
+  // Generate recommended routes
+  const routes: Route[] = [
     {
       id: 'route-1',
-      from: 'Aba City Center',
-      to: 'Onitsha',
+      from: fromCity,
+      to: toCity,
       distance: '85 km',
       time: '1h 45min',
       safetyScore: 87,
       incidents: 1,
       color: 'green',
-      coordinates: [
-        [7.3667, 5.1098],
-        [7.2, 5.5],
-        [6.7849, 6.1839],
-      ],
     },
     {
       id: 'route-2',
-      from: 'Aba City Center',
-      to: 'Port Harcourt',
-      distance: '63 km',
-      time: '1h 30min',
-      safetyScore: 45,
-      incidents: 5,
-      color: 'red',
-      coordinates: [
-        [7.3667, 5.1098],
-        [7.0, 4.9],
-        [7.0146, 4.7957],
-      ],
+      from: fromCity,
+      to: toCity,
+      distance: '92 km',
+      time: '2h 10min',
+      safetyScore: 64,
+      incidents: 3,
+      color: 'yellow',
     },
     {
       id: 'route-3',
-      from: 'Aba City Center',
-      to: 'Enugu',
-      distance: '92 km',
-      time: '2h 15min',
-      safetyScore: 72,
-      incidents: 2,
-      color: 'yellow',
-      coordinates: [
-        [7.3667, 5.1098],
-        [6.8, 5.5],
-        [5.5211, 6.4969],
-      ],
+      from: fromCity,
+      to: toCity,
+      distance: '110 km',
+      time: '2h 45min',
+      safetyScore: 42,
+      incidents: 6,
+      color: 'red',
     },
   ]
 
-  const filteredRoutes = mockRoutes.filter(
-    (route) =>
-      route.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      route.to.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const getColorClasses = (color: string) => {
+  const getColor = (color: string) => {
     switch (color) {
       case 'green':
-        return 'from-green-600 to-emerald-600 text-green-300'
-      case 'red':
-        return 'from-red-600 to-rose-600 text-red-300'
+        return '#22c55e'
       case 'yellow':
-        return 'from-yellow-600 to-amber-600 text-yellow-300'
+        return '#eab308'
+      case 'red':
+        return '#ef4444'
       default:
-        return 'from-slate-600 to-slate-700'
+        return '#3b82f6'
     }
   }
 
   return (
-    <>
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-24 right-4 z-30 w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg flex items-center justify-center transition-transform hover:scale-110"
-      >
-        {isOpen ? (
-          <X className="w-6 h-6 text-white" />
-        ) : (
-          <Navigation className="w-6 h-6 text-white" />
-        )}
-      </button>
+    <div className="fixed bottom-24 left-0 right-0 px-4 z-[300]">
+      <div className="glass-dark rounded-2xl p-6 max-w-2xl mx-auto space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-white flex items-center gap-2">
+            <Navigation className="w-5 h-5 text-blue-400" />
+            Safe Route Advisor
+          </h3>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+          >
+            <ChevronDown
+              className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+        </div>
 
-      {/* Route Advice Panel */}
-      {isOpen && (
-        <div className="fixed inset-x-0 top-0 z-50 h-screen max-h-screen overflow-auto">
-          {/* Background */}
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm -z-10"
-            onClick={() => setIsOpen(false)}
-          />
-
-          {/* Panel */}
-          <div className="glass-dark rounded-b-3xl border-b border-slate-700/30 p-6 space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Safe Routes</h3>
+        {/* City Selection */}
+        <div className="space-y-3">
+          <div className="flex gap-3 items-center">
+            {/* From City */}
+            <div className="flex-1 relative">
               <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-slate-700/30 rounded-lg transition-colors"
+                onClick={() => {
+                  setShowFromDropdown(!showFromDropdown)
+                  setShowToDropdown(false)
+                }}
+                className="w-full glass rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700/40 transition-colors flex items-center justify-between"
               >
-                <X className="w-5 h-5 text-slate-400" />
+                <span className="truncate">{fromCity}</span>
+                <ChevronDown className="w-4 h-4 flex-shrink-0" />
               </button>
+              {showFromDropdown && (
+                <div className="absolute top-full mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                  {SOUTHEAST_CITIES.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => {
+                        setFromCity(city)
+                        setShowFromDropdown(false)
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-700 transition-colors ${
+                        city === fromCity ? 'bg-green-500/20 text-green-300' : 'text-slate-300'
+                      }`}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search destinations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-700/50 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50"
-              />
-            </div>
+            {/* Arrow */}
+            <ArrowRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
 
-            {/* Routes List */}
-            <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-              {filteredRoutes.length > 0 ? (
-                filteredRoutes.map((route) => (
-                  <button
-                    key={route.id}
-                    onClick={() => setSelectedRoute(route.id)}
-                    className={`w-full p-4 rounded-lg transition-all text-left border ${
-                      selectedRoute === route.id
-                        ? `glass-dark border-blue-500/50 bg-blue-500/10`
-                        : `glass-dark border-slate-600/30 hover:border-slate-500/30`
-                    }`}
-                  >
-                    {/* Route Header */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm font-semibold text-slate-200">
-                          {route.from} → {route.to}
-                        </span>
-                      </div>
-                      <span className="text-xs font-medium text-slate-400">
-                        {route.distance}
-                      </span>
-                    </div>
-
-                    {/* Route Info */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {/* Safety Score */}
-                      <div className={`p-2 rounded bg-gradient-to-br ${getColorClasses(route.color)}`}>
-                        <div className="text-xs font-bold">{route.safetyScore}%</div>
-                        <div className="text-xs opacity-75">Safety</div>
-                      </div>
-
-                      {/* Travel Time */}
-                      <div className="p-2 rounded bg-slate-800/50 text-slate-300">
-                        <div className="text-xs font-bold">{route.time}</div>
-                        <div className="text-xs opacity-75">ETA</div>
-                      </div>
-
-                      {/* Incidents */}
-                      <div className="p-2 rounded bg-slate-800/50 text-slate-300">
-                        <div className="text-xs font-bold">{route.incidents}</div>
-                        <div className="text-xs opacity-75">Reports</div>
-                      </div>
-                    </div>
-
-                    {/* Recommend Badge */}
-                    {route.safetyScore >= 80 && (
-                      <div className="mt-3 text-xs font-semibold text-emerald-300 flex items-center gap-1">
-                        <TrendingDown className="w-3 h-3" /> Recommended Route
-                      </div>
-                    )}
-                  </button>
-                ))
-              ) : (
-                <p className="text-sm text-slate-400 text-center py-8">No routes found</p>
+            {/* To City */}
+            <div className="flex-1 relative">
+              <button
+                onClick={() => {
+                  setShowToDropdown(!showToDropdown)
+                  setShowFromDropdown(false)
+                }}
+                className="w-full glass rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700/40 transition-colors flex items-center justify-between"
+              >
+                <span className="truncate">{toCity}</span>
+                <ChevronDown className="w-4 h-4 flex-shrink-0" />
+              </button>
+              {showToDropdown && (
+                <div className="absolute top-full mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                  {SOUTHEAST_CITIES.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => {
+                        setToCity(city)
+                        setShowToDropdown(false)
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-700 transition-colors ${
+                        city === toCity ? 'bg-green-500/20 text-green-300' : 'text-slate-300'
+                      }`}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
         </div>
-      )}
-    </>
+
+        {/* Routes List */}
+        {isOpen && (
+          <div className="space-y-2 pt-4 border-t border-slate-700">
+            {routes.map((route) => {
+              const color = getColor(route.color)
+              return (
+                <button
+                  key={route.id}
+                  className="w-full glass-dark hover:bg-slate-700/40 rounded-lg p-4 text-left transition-colors group"
+                  style={{
+                    borderLeft: `3px solid ${color}`,
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-white">{route.distance}</span>
+                        <span className="text-xs text-slate-400">•</span>
+                        <span className="text-xs text-slate-400">{route.time}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-lg font-bold text-white">{route.safetyScore}</span>
+                          <span className="text-xs text-slate-400">/100</span>
+                        </div>
+                        <span className="text-xs text-slate-400">•</span>
+                        <span className="text-xs text-slate-400">{route.incidents} incidents</span>
+                      </div>
+                    </div>
+                    {route.color === 'green' && (
+                      <div className="bg-green-500/20 border border-green-500/50 rounded-full px-3 py-1 flex-shrink-0">
+                        <span className="text-xs font-semibold text-green-300">Recommended</span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

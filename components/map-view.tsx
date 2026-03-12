@@ -1,12 +1,25 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { useMap } from '@/lib/map-context'
 import { AlertTriangle, Zap, AlertCircle, CheckCircle2, MapPin } from 'lucide-react'
 
 // ABA, NIGERIA COORDINATES
 const ABA_CENTER = { lat: 5.1098, lng: 7.3667 }
-const MAP_BOUNDS = { minLat: 4.8, maxLat: 5.4, minLng: 7.0, maxLng: 7.7 }
+
+// Fix Leaflet icon issue
+const DefaultIcon = L.icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
+L.Marker.prototype.setIcon(DefaultIcon)
 
 function getSeverityColor(severity: string): string {
   switch (severity) {
@@ -35,131 +48,99 @@ function getSeverityIcon(type: string, severity: string) {
   }
 }
 
-function latLngToCanvasCoords(lat: number, lng: number, width: number, height: number): { x: number; y: number } {
-  const x = ((lng - MAP_BOUNDS.minLng) / (MAP_BOUNDS.maxLng - MAP_BOUNDS.minLng)) * width
-  const y = ((MAP_BOUNDS.maxLat - lat) / (MAP_BOUNDS.maxLat - MAP_BOUNDS.minLat)) * height
-  return { x, y }
-}
-
 export function MapView() {
   const { incidents, highways, selectIncident } = useMap()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const markersRef = useRef<L.CircleMarker[]>([])
+  const linesRef = useRef<L.Polyline[]>([])
 
+  // Initialize map
   useEffect(() => {
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    if (!canvas || !container) return
+    if (!containerRef.current || mapRef.current) return
 
-    const width = container.clientWidth
-    const height = container.clientHeight
+    const map = L.map(containerRef.current, {
+      attributionControl: false,
+    }).setView([ABA_CENTER.lat, ABA_CENTER.lng], 11)
 
-    canvas.width = width
-    canvas.height = height
+    mapRef.current = map
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    // Add OpenStreetMap tiles with dark theme
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap',
+    }).addTo(map)
 
-    // Draw map background
-    ctx.fillStyle = '#1e293b'
-    ctx.fillRect(0, 0, width, height)
+    // Add center marker
+    L.circleMarker([ABA_CENTER.lat, ABA_CENTER.lng], {
+      color: '#3b82f6',
+      radius: 8,
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8,
+    })
+      .bindPopup('Aba, Nigeria')
+      .addTo(map)
+  }, [])
 
-    // Draw grid pattern
-    ctx.strokeStyle = '#334155'
-    ctx.lineWidth = 0.5
-    const gridSize = 40
-    for (let x = 0; x < width; x += gridSize) {
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, height)
-      ctx.stroke()
-    }
-    for (let y = 0; y < height; y += gridSize) {
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(width, y)
-      ctx.stroke()
-    }
+  // Update highways
+  useEffect(() => {
+    if (!mapRef.current) return
 
-    // Draw highways with glow effect
+    linesRef.current.forEach((line) => mapRef.current?.removeLayer(line))
+    linesRef.current = []
+
     highways.forEach((highway) => {
-      const points = highway.coordinates.map(([lng, lat]) => 
-        latLngToCanvasCoords(lat, lng, width, height)
-      )
-
       const color = highway.status === 'danger' ? '#ef4444' : highway.status === 'caution' ? '#eab308' : '#22c55e'
 
-      // Glow
-      ctx.strokeStyle = color
-      ctx.lineWidth = 10
-      ctx.globalAlpha = 0.2
-      ctx.beginPath()
-      ctx.moveTo(points[0].x, points[0].y)
-      points.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
-      ctx.stroke()
+      const line = L.polyline(
+        highway.coordinates.map(([lng, lat]) => [lat, lng]),
+        {
+          color,
+          weight: 4,
+          opacity: 0.8,
+          lineCap: 'round',
+          lineJoin: 'round',
+        }
+      ).addTo(mapRef.current)
 
-      // Main line
-      ctx.globalAlpha = 1
-      ctx.strokeStyle = color
-      ctx.lineWidth = 3
-      ctx.beginPath()
-      ctx.moveTo(points[0].x, points[0].y)
-      points.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
-      ctx.stroke()
+      linesRef.current.push(line)
     })
+  }, [highways])
 
-    // Draw center marker
-    const centerCoords = latLngToCanvasCoords(ABA_CENTER.lat, ABA_CENTER.lng, width, height)
-    ctx.fillStyle = '#3b82f6'
-    ctx.globalAlpha = 0.3
-    ctx.beginPath()
-    ctx.arc(centerCoords.x, centerCoords.y, 30, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.globalAlpha = 1
-    ctx.fillStyle = '#3b82f6'
-    ctx.beginPath()
-    ctx.arc(centerCoords.x, centerCoords.y, 8, 0, Math.PI * 2)
-    ctx.fill()
+  // Update incident markers
+  useEffect(() => {
+    if (!mapRef.current) return
 
-    // Draw incident markers
+    markersRef.current.forEach((marker) => mapRef.current?.removeLayer(marker))
+    markersRef.current = []
+
     incidents.forEach((incident) => {
-      const coords = latLngToCanvasCoords(incident.lat, incident.lng, width, height)
       const color = getSeverityColor(incident.severity)
 
-      // Glow pulse
-      const now = Date.now()
-      const pulse = Math.sin((now % 2000) / 2000 * Math.PI) * 0.5 + 0.5
-      ctx.fillStyle = color
-      ctx.globalAlpha = 0.3 * pulse
-      ctx.beginPath()
-      ctx.arc(coords.x, coords.y, 20, 0, Math.PI * 2)
-      ctx.fill()
+      const marker = L.circleMarker([incident.lat, incident.lng], {
+        color,
+        radius: 10,
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.7,
+      })
+        .bindPopup(
+          `<div class="text-sm"><strong>${incident.type}</strong><br/>${incident.description}<br/><small>${new Date(incident.timestamp).toLocaleTimeString()}</small></div>`
+        )
+        .addTo(mapRef.current)
 
-      // Marker circle
-      ctx.globalAlpha = 1
-      ctx.strokeStyle = color
-      ctx.lineWidth = 2
-      ctx.fillStyle = '#000a0f'
-      ctx.beginPath()
-      ctx.arc(coords.x, coords.y, 10, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke()
-
-      // Icon indicator
-      ctx.fillStyle = color
-      ctx.font = '12px sans-serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText('!', coords.x, coords.y)
+      marker.on('click', () => selectIncident(incident))
+      markersRef.current.push(marker)
     })
-  }, [incidents, highways])
+  }, [incidents, selectIncident])
 
   return (
-    <div ref={containerRef} className="relative w-full h-full bg-slate-900 rounded-xl overflow-hidden">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full block cursor-pointer"
-      />
+    <div ref={containerRef} className="relative w-full h-full bg-slate-900 rounded-xl overflow-hidden"
+      style={{ 
+        fontSize: '14px'
+      }}
+    >
 
       {/* Map Legend */}
       <div className="absolute bottom-4 left-4 glass-dark rounded-lg p-4 text-xs max-w-xs">

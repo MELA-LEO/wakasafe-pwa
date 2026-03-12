@@ -47,17 +47,37 @@ export default function ProfilePage() {
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
         {/* Profile Header Card */}
         <div className="glass-dark rounded-2xl p-8 space-y-6">
-          {/* User Info with Verified Badge */}
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold text-white">Safe Driver</h2>
-              <div className="flex items-center gap-2">
+          {/* User Info with Verified Badge and Profile Picture */}
+          <div className="flex items-start gap-6">
+            {/* Profile Picture */}
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl font-bold text-white">
+                  {user.phone?.charAt(0) || 'U'}
+                </span>
+              </div>
+              <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 cursor-pointer transition-colors">
+                <Plus className="w-4 h-4" />
+                <input type="file" accept="image/*" className="hidden" />
+              </label>
+            </div>
+
+            {/* User Info */}
+            <div className="space-y-3 flex-1">
+              <h2 className="text-3xl font-bold text-white">Hello, Safe Driver! 👋</h2>
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-slate-400">{user.phone}</span>
                 <div className="flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/50 rounded-full px-3 py-1">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full" />
                   <span className="text-xs font-semibold text-emerald-300">Verified</span>
                 </div>
+                <div className="flex items-center gap-1 bg-purple-500/20 border border-purple-500/50 rounded-full px-3 py-1">
+                  <span className="text-xs font-semibold text-purple-300">Premium ⭐</span>
+                </div>
               </div>
+              <Link href="/plans" className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                View all plans →
+              </Link>
             </div>
           </div>
 
