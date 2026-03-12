@@ -262,7 +262,7 @@ export function AuthView() {
 
               {/* Google Tab */}
               <TabsContent value="google" className="space-y-4 mt-6">
-              <Button
+                <Button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
                 className="w-full bg-white text-slate-950 hover:bg-slate-100"
@@ -275,8 +275,8 @@ export function AuthView() {
                 ) : (
                   'Sign in with Google'
                 )}
-              </Button>
-            </TabsContent>
+                </Button>
+              </TabsContent>
             </Tabs>
           ) : (
             /* Sign Up Form */
