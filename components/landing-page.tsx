@@ -32,9 +32,6 @@ export function LandingPage() {
               <a href="#about" className="hover:text-slate-200 transition-colors">
                 About
               </a>
-              <a href="#plans" className="hover:text-slate-200 transition-colors">
-                Plans
-              </a>
             </nav>
           </div>
         </header>
