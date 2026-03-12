@@ -93,7 +93,7 @@ export function ReportGrid() {
   }
 
   return (
-    <div className="fixed bottom-32 left-0 right-0 px-4 z-[300]">
+    <div className="fixed bottom-56 left-0 right-0 px-4 z-[250]">
       <div className="max-w-2xl mx-auto">
         {/* Report Grid Modal */}
         {selectedReport ? (

@@ -87,7 +87,7 @@ export function RouteAdvice() {
   }
 
   return (
-    <div className="fixed bottom-24 left-0 right-0 px-4 z-[300]">
+    <div className="fixed top-24 left-0 right-0 px-4 z-[250]">
       <div className="glass-dark rounded-2xl p-6 max-w-2xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
