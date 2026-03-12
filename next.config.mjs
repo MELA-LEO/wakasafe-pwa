@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// WAKASAFE PWA Configuration
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
