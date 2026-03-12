@@ -108,28 +108,6 @@ export function AuthView() {
             <p className="text-slate-400">Welcome to WAKASAFE</p>
           </div>
 
-          {/* Sign In / Sign Up Toggle */}
-          <div className="flex gap-2 bg-slate-800/40 p-1 rounded-lg border border-slate-700/30">
-            <button
-              onClick={() => {
-                setAuthMode('signin')
-                setError('')
-              }}
-              className="flex-1 py-2 px-4 rounded-md font-medium transition-all bg-green-600 text-white hover:bg-green-700"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => {
-                setAuthMode('signup')
-                setError('')
-              }}
-              className="flex-1 py-2 px-4 rounded-md font-medium transition-all text-slate-400 hover:text-slate-300 hover:bg-slate-700/20"
-            >
-              Sign Up
-            </button>
-          </div>
-
           {/* User Type Selection */}
           <div className="space-y-3">
             <p className="text-sm text-slate-300">Select account type</p>
