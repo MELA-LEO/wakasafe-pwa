@@ -229,8 +229,36 @@ export function AuthView() {
                       Back to phone number
                     </button>
                   </div>
-                </>
-              )}
+                ) : (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-slate-300">Enter your phone number</label>
+                      <Input
+                        type="tel"
+                        placeholder="+234..."
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        disabled={isLoading}
+                        className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleSendOTP}
+                      disabled={isLoading}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        'Send OTP'
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
             </TabsContent>
 
             {/* Google Tab */}
