@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2 } from 'lucide-react'
 
-// v2 - Rebuilt 2026-03-12
 export function AuthView() {
   const router = useRouter()
   const { register, login, loginWithGoogle, userType, setUserType } = useAuth()
