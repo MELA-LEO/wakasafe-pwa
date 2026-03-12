@@ -124,7 +124,7 @@ export function AuthView() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
               WAKASAFE
             </h1>
-            <p className="text-slate-400">{t('welcome')}</p>
+            <p className="text-slate-400">Welcome to WAKASAFE - Road Safety Platform</p>
           </div>
 
           {/* Sign In / Sign Up Toggle */}
@@ -151,7 +151,7 @@ export function AuthView() {
 
           {/* User Type Selection */}
           <div className="space-y-3">
-            <p className="text-sm text-slate-300">{t('selectUserType')}</p>
+            <p className="text-sm text-slate-300">Select account type</p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setUserType('individual')}
@@ -161,7 +161,7 @@ export function AuthView() {
                     : 'glass-dark border-slate-600/30 hover:border-slate-500/30'
                 }`}
               >
-                <p className="text-sm font-medium text-slate-200">{t('individual')}</p>
+                <p className="text-sm font-medium text-slate-200">Individual</p>
               </button>
               <button
                 onClick={() => setUserType('logistics')}
@@ -171,7 +171,7 @@ export function AuthView() {
                     : 'glass-dark border-slate-600/30 hover:border-slate-500/30'
                 }`}
               >
-                <p className="text-sm font-medium text-slate-200">{t('logistics')}</p>
+                <p className="text-sm font-medium text-slate-200">Logistics</p>
               </button>
             </div>
           </div>
@@ -190,40 +190,10 @@ export function AuthView() {
                 </TabsTrigger>
               </TabsList>
 
-            {/* Phone Tab */}
-            <TabsContent value="phone" className="space-y-4 mt-6">
-              {!isOtpSent ? (
-                <>
+              <TabsContent value="phone" className="space-y-4">
+                {isOtpSent ? (
                   <div className="space-y-2">
-                    <label className="text-sm text-slate-300">{t('enterPhone')}</label>
-                    <Input
-                      type="tel"
-                      placeholder="+234..."
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      disabled={isLoading}
-                      className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleSendOTP}
-                    disabled={isLoading}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('loading')}
-                      </>
-                    ) : (
-                      t('sendOTP')
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-300">{t('enterOTP')}</label>
+                    <label className="text-sm text-slate-300">Enter OTP code</label>
                     <Input
                       type="text"
                       placeholder="000000"
@@ -242,10 +212,10 @@ export function AuthView() {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('loading')}
+                        Loading...
                       </>
                     ) : (
-                      t('verifyOTP')
+                      'Verify OTP'
                     )}
                   </Button>
                   <button
@@ -255,7 +225,7 @@ export function AuthView() {
                     }}
                     className="w-full text-sm text-blue-400 hover:text-blue-300"
                   >
-                    {t('enterPhone')}
+                    Back to phone number
                   </button>
                 </>
               )}
@@ -271,10 +241,10 @@ export function AuthView() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('loading')}
+                    Loading...
                   </>
                 ) : (
-                  t('googleAuth')
+                  'Sign in with Google'
                 )}
               </Button>
             </TabsContent>
