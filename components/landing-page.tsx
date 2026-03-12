@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, MapPin, Shield, Zap } from 'lucide-react'
 
+// v2 - Rebuilt 2026-03-12
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
