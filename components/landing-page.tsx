@@ -2,13 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useLanguage } from '@/lib/language-context'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, MapPin, Shield, Zap } from 'lucide-react'
+import { Shield, Zap, MapPin, AlertTriangle } from 'lucide-react'
 
 export function LandingPage() {
-  const { t } = useLanguage()
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Background gradient overlay */}
@@ -77,8 +74,8 @@ export function LandingPage() {
 
             {/* CTA Button */}
             <Link href="/auth/onboarding" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-12 text-base bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
-                {t('getStarted')} →
+              <Button className="w-full sm:w-auto h-12 text-base bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
+                Get Started →
               </Button>
             </Link>
           </div>

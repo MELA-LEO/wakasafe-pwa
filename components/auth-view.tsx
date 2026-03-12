@@ -3,45 +3,47 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { useLanguage } from '@/lib/language-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, Loader2, Phone, Mail } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 export function AuthView() {
   const router = useRouter()
-  const { login, loginWithGoogle, userType, setUserType } = useAuth()
-  const { t } = useLanguage()
+  const { register, login, loginWithGoogle, userType, setUserType } = useAuth()
 
-  const [activeTab, setActiveTab] = useState('phone')
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
-  const [isOtpSent, setIsOtpSent] = useState(false)
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Sign In state
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [isOtpSent, setIsOtpSent] = useState(false)
+
+  // Sign Up state
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [signupPhone, setSignupPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
   const handleSendOTP = async () => {
     if (!phone) {
-      setError('Please enter a phone number')
+      setError('Please enter phone number')
       return
     }
     setIsLoading(true)
     setError('')
     try {
-      // Simulate OTP sending
-      await new Promise((resolve) => setTimeout(resolve, 1000))
       setIsOtpSent(true)
-    } catch (err) {
-      setError('Failed to send OTP')
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit code')
+    if (!otp || otp.length < 6) {
+      setError('Please enter 6-digit OTP')
       return
     }
     setIsLoading(true)
@@ -56,11 +58,35 @@ export function AuthView() {
     }
   }
 
+  const handleSignUp = async () => {
+    if (!fullName || !email || !signupPhone || !password) {
+      setError('Please fill in all required fields')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+    setIsLoading(true)
+    setError('')
+    try {
+      await register(fullName, email, signupPhone, password)
+      router.push('/dashboard')
+    } catch (err) {
+      setError('Failed to create account')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleGoogleLogin = async () => {
     setIsLoading(true)
     setError('')
     try {
-      // Mock Google OAuth - in production, use @react-oauth/google
       await loginWithGoogle('mock-token')
       router.push('/dashboard')
     } catch (err) {
@@ -71,27 +97,42 @@ export function AuthView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4">
-      {/* Background elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
-
-      {/* Main Card */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="glass-dark backdrop-blur-xl border border-slate-700/30 rounded-2xl p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="glass-dark rounded-2xl p-8 space-y-6">
           {/* Header */}
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
               WAKASAFE
             </h1>
-            <p className="text-slate-400">{t('welcome')}</p>
+            <p className="text-slate-400">Welcome to WAKASAFE</p>
+          </div>
+
+          {/* Sign In / Sign Up Toggle */}
+          <div className="flex gap-2 bg-slate-800/40 p-1 rounded-lg border border-slate-700/30">
+            <button
+              onClick={() => {
+                setAuthMode('signin')
+                setError('')
+              }}
+              className="flex-1 py-2 px-4 rounded-md font-medium transition-all bg-green-600 text-white hover:bg-green-700"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                setAuthMode('signup')
+                setError('')
+              }}
+              className="flex-1 py-2 px-4 rounded-md font-medium transition-all text-slate-400 hover:text-slate-300 hover:bg-slate-700/20"
+            >
+              Sign Up
+            </button>
           </div>
 
           {/* User Type Selection */}
           <div className="space-y-3">
-            <p className="text-sm text-slate-300">{t('selectUserType')}</p>
+            <p className="text-sm text-slate-300">Select account type</p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setUserType('individual')}
@@ -101,7 +142,7 @@ export function AuthView() {
                     : 'glass-dark border-slate-600/30 hover:border-slate-500/30'
                 }`}
               >
-                <p className="text-sm font-medium text-slate-200">{t('individual')}</p>
+                <p className="text-sm font-medium text-slate-200">Individual</p>
               </button>
               <button
                 onClick={() => setUserType('logistics')}
@@ -111,30 +152,25 @@ export function AuthView() {
                     : 'glass-dark border-slate-600/30 hover:border-slate-500/30'
                 }`}
               >
-                <p className="text-sm font-medium text-slate-200">{t('logistics')}</p>
+                <p className="text-sm font-medium text-slate-200">Logistics</p>
               </button>
             </div>
           </div>
 
-          {/* Auth Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-slate-800/40 border border-slate-700/30">
-              <TabsTrigger value="phone" className="text-xs">
-                <Phone className="w-4 h-4 mr-2" />
-                Phone
-              </TabsTrigger>
-              <TabsTrigger value="google" className="text-xs">
-                <Mail className="w-4 h-4 mr-2" />
-                Google
-              </TabsTrigger>
-            </TabsList>
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-sm text-red-300">
+              {error}
+            </div>
+          )}
 
-            {/* Phone Tab */}
-            <TabsContent value="phone" className="space-y-4 mt-6">
+          {/* Sign In / Sign Up Forms */}
+          {authMode === 'signin' ? (
+            <div className="space-y-4">
               {!isOtpSent ? (
                 <>
                   <div className="space-y-2">
-                    <label className="text-sm text-slate-300">{t('enterPhone')}</label>
+                    <label className="text-sm text-slate-300">Enter your phone number</label>
                     <Input
                       type="tel"
                       placeholder="+234..."
@@ -152,17 +188,17 @@ export function AuthView() {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('loading')}
+                        Loading...
                       </>
                     ) : (
-                      t('sendOTP')
+                      'Send OTP'
                     )}
                   </Button>
                 </>
               ) : (
                 <>
                   <div className="space-y-2">
-                    <label className="text-sm text-slate-300">{t('enterOTP')}</label>
+                    <label className="text-sm text-slate-300">Enter OTP code</label>
                     <Input
                       type="text"
                       placeholder="000000"
@@ -181,10 +217,10 @@ export function AuthView() {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('loading')}
+                        Loading...
                       </>
                     ) : (
-                      t('verifyOTP')
+                      'Verify OTP'
                     )}
                   </Button>
                   <button
@@ -194,14 +230,18 @@ export function AuthView() {
                     }}
                     className="w-full text-sm text-blue-400 hover:text-blue-300"
                   >
-                    {t('enterPhone')}
+                    Back to phone number
                   </button>
                 </>
               )}
-            </TabsContent>
-
-            {/* Google Tab */}
-            <TabsContent value="google" className="space-y-4 mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-700/30" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-slate-900 text-slate-400">Or</span>
+                </div>
+              </div>
               <Button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
@@ -210,27 +250,86 @@ export function AuthView() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('loading')}
+                    Loading...
                   </>
                 ) : (
-                  t('googleAuth')
+                  'Sign in with Google'
                 )}
               </Button>
-            </TabsContent>
-          </Tabs>
-
-          {/* Error Message */}
-          {error && (
-            <div className="flex gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-200">{error}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Full Name *</label>
+                <Input
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Email Address *</label>
+                <Input
+                  type="email"
+                  placeholder="john@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Phone Number *</label>
+                <Input
+                  type="tel"
+                  placeholder="+234..."
+                  value={signupPhone}
+                  onChange={(e) => setSignupPhone(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Password *</label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Confirm Password *</label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+              <Button
+                onClick={handleSignUp}
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Account
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </Button>
             </div>
           )}
-
-          {/* Footer */}
-          <p className="text-xs text-slate-500 text-center">
-            By continuing, you agree to WAKASAFE Terms & Privacy Policy
-          </p>
         </div>
       </div>
     </div>
