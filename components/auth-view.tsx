@@ -134,11 +134,7 @@ export function AuthView() {
                 setAuthMode('signin')
                 setError('')
               }}
-              className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-                authMode === 'signin'
-                  ? 'bg-green-600 text-white'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
+              className="flex-1 py-2 px-4 rounded-md font-medium transition-all bg-green-600 text-white hover:bg-green-700"
             >
               Sign In
             </button>
@@ -147,11 +143,7 @@ export function AuthView() {
                 setAuthMode('signup')
                 setError('')
               }}
-              className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-                authMode === 'signup'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
+              className="flex-1 py-2 px-4 rounded-md font-medium transition-all text-slate-400 hover:text-slate-300 hover:bg-slate-700/20"
             >
               Sign Up
             </button>
