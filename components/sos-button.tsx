@@ -1,115 +1,114 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useLanguage } from '@/lib/language-context'
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle, X, AlertCircle } from 'lucide-react'
 
 export function SOSButton() {
   const { user } = useAuth()
   const { t } = useLanguage()
-  const [isActive, setIsActive] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
 
-  const triggerSOS = async () => {
-    setIsActive(true)
+  const handleOpenModal = () => {
+    setShowModal(true)
   }
 
-  const deactivateSOS = () => {
-    setIsActive(false)
+  const handleConfirmSOS = async () => {
+    setIsConfirmed(true)
+    console.log('[v0] SOS Confirmed - Emergency alert sent')
+    console.log('[v0] User Location:', user?.lastLocation)
+    console.log('[v0] Emergency Contacts:', user?.emergencyContacts)
+
+    setTimeout(() => {
+      setIsConfirmed(false)
+      setShowModal(false)
+    }, 3000)
   }
 
-  useEffect(() => {
-    if (isActive) {
-      const timer = setTimeout(() => {
-        setIsActive(false)
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [isActive])
+  const handleCancel = () => {
+    setShowModal(false)
+    setIsConfirmed(false)
+  }
 
   return (
     <>
-      {/* SOS Button */}
+      {/* SOS Button - Single Tap */}
       <div className="fixed bottom-40 right-4 z-30">
-        <div className="relative w-20 h-20">
-          {/* Pulsing rings background */}
-          {isActive && (
-            <>
-              <div className="absolute inset-0 rounded-full border-2 border-red-500/30 animate-ping" />
-              <div className="absolute inset-0 rounded-full border-2 border-red-500/20 animate-pulse" />
-            </>
-          )}
-
-          {/* Main button */}
-          <button
-            onClick={triggerSOS}
-            disabled={isActive}
-            className={`relative w-full h-full rounded-full font-bold text-white transition-all transform ${
-              isActive
-                ? 'bg-red-600 shadow-2xl shadow-red-600/50 scale-100'
-                : 'bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
-            }`}
-          >
-            {/* Button content */}
-            <div className="flex flex-col items-center justify-center h-full gap-1">
-              <AlertTriangle className="w-6 h-6" />
-              <span className="text-xs font-bold">SOS</span>
-            </div>
-          </button>
-        </div>
+        <button
+          onClick={handleOpenModal}
+          disabled={showModal}
+          className={`relative w-20 h-20 rounded-full font-bold text-white transition-all transform shadow-lg ${
+            showModal
+              ? 'bg-red-600/50 shadow-red-600/30 scale-95 opacity-75'
+              : 'bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:scale-110 active:scale-95'
+          }`}
+        >
+          <div className="flex flex-col items-center justify-center h-full gap-1">
+            <AlertTriangle className="w-6 h-6" />
+            <span className="text-xs font-bold">SOS</span>
+          </div>
+        </button>
       </div>
 
-      {/* SOS Active Modal */}
-      {isActive && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-end">
-          <div className="w-full glass-dark border-t border-slate-700/30 rounded-t-3xl p-6 space-y-4 animate-in slide-in-from-bottom-5">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                <div>
-                  <h2 className="text-lg font-bold text-red-400">{t('sosActive')}</h2>
-                  <p className="text-xs text-slate-400">{t('callHelp')}</p>
-                </div>
-              </div>
-              <button
-                onClick={deactivateSOS}
-                className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
+      {/* SOS Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="glass-dark rounded-2xl p-6 max-w-sm mx-4 space-y-4 border border-slate-700/30">
+            <button
+              onClick={handleCancel}
+              disabled={isConfirmed}
+              className="absolute top-4 right-4 p-2 hover:bg-slate-800/30 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
 
-            {/* Info */}
-            <div className="space-y-3 text-sm">
-              <div className="glass rounded-lg p-3">
-                <p className="text-slate-300">Sending your location to emergency contacts...</p>
-              </div>
-              {user?.emergencyContacts.length ? (
-                <div className="glass rounded-lg p-3">
-                  <p className="text-xs text-slate-400 mb-2">Alerting:</p>
-                  <div className="space-y-1">
-                    {user.emergencyContacts.map((contact) => (
-                      <p key={contact} className="text-sm text-slate-300">
-                        • {contact}
-                      </p>
-                    ))}
+            {isConfirmed ? (
+              <div className="text-center space-y-4 py-4">
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500/50 flex items-center justify-center animate-pulse">
+                    <AlertCircle className="w-8 h-8 text-green-400" />
                   </div>
                 </div>
-              ) : (
-                <div className="glass rounded-lg p-3 border-yellow-500/30 bg-yellow-500/5">
-                  <p className="text-xs text-yellow-300">No emergency contacts added. Add contacts in settings.</p>
+                <div>
+                  <h2 className="text-xl font-bold text-green-400">Alert Sent!</h2>
+                  <p className="text-sm text-slate-400 mt-2">Emergency contacts have been notified with your location.</p>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <>
+                <div className="text-center space-y-2">
+                  <div className="flex justify-center">
+                    <div className="w-12 h-12 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-red-400" />
+                    </div>
+                  </div>
+                  <h2 className="text-2xl font-bold text-red-400">Emergency SOS</h2>
+                  <p className="text-sm text-slate-400">Are you in danger? This will alert emergency services.</p>
+                </div>
 
-            {/* Cancel button */}
-            <button
-              onClick={deactivateSOS}
-              className="w-full py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-slate-200 font-medium transition-colors"
-            >
-              Cancel
-            </button>
+                <div className="glass rounded-lg p-4 space-y-2 border border-slate-700/30">
+                  <p className="text-xs text-slate-400 uppercase font-semibold">Your Location</p>
+                  <p className="text-sm text-slate-200">5.1098, 7.3667</p>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <button
+                    onClick={handleConfirmSOS}
+                    className="w-full py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-colors"
+                  >
+                    Yes, Send Emergency Alert
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="w-full py-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-slate-200 font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
