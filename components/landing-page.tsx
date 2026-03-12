@@ -75,12 +75,19 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* CTA Button */}
-            <Link href="/auth/onboarding" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-12 text-base bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
-                {t('getStarted')} →
-              </Button>
-            </Link>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link href="/auth/onboarding" className="flex-1 sm:flex-none">
+                <Button className="w-full sm:w-auto h-12 text-base bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
+                  {t('getStarted')} →
+                </Button>
+              </Link>
+              <Link href="/auth/onboarding" className="flex-1 sm:flex-none">
+                <Button className="w-full sm:w-auto h-12 text-base border border-slate-600 hover:border-slate-500 bg-slate-900/30 hover:bg-slate-900/50 text-slate-200 font-semibold rounded-lg transition-all">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Right - Image */}

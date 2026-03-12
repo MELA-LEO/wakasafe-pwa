@@ -8,7 +8,9 @@ interface User {
   id: string
   phone: string
   name: string
+  nickname?: string
   email?: string
+  address?: string
   userType: UserType
   safetyScore: number
   lastLocation?: { lat: number; lng: number }
@@ -20,6 +22,7 @@ interface AuthContextType {
   isLoading: boolean
   userType: UserType
   setUserType: (type: UserType) => void
+  register: (fullName: string, email: string, phone: string, password: string, nickname?: string, address?: string) => Promise<void>
   login: (phone: string, otp: string) => Promise<void>
   loginWithGoogle: (idToken: string) => Promise<void>
   logout: () => Promise<void>
@@ -47,6 +50,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setIsLoading(false)
   }, [])
+
+  const register = async (fullName: string, email: string, phone: string, password: string, nickname?: string, address?: string) => {
+    setIsLoading(true)
+    try {
+      // Firebase registration would be implemented here
+      // For now, using mock implementation with localStorage
+      const newUser: User = {
+        id: `user-${Date.now()}`,
+        phone,
+        name: fullName,
+        nickname,
+        email,
+        address,
+        userType,
+        safetyScore: 50,
+        emergencyContacts: [],
+      }
+      setUser(newUser)
+      localStorage.setItem('wakasafe-user', JSON.stringify(newUser))
+      localStorage.setItem('wakasafe-email', email)
+    } catch (error) {
+      console.error('Registration failed:', error)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const login = async (phone: string, otp: string) => {
     setIsLoading(true)
@@ -132,6 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         userType,
         setUserType,
+        register,
         login,
         loginWithGoogle,
         logout,

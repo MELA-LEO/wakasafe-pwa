@@ -11,13 +11,26 @@ import { AlertCircle, Loader2, Phone, Mail } from 'lucide-react'
 
 export function AuthView() {
   const router = useRouter()
-  const { login, loginWithGoogle, userType, setUserType } = useAuth()
+  const { register, login, loginWithGoogle, userType, setUserType } = useAuth()
   const { t } = useLanguage()
 
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [activeTab, setActiveTab] = useState('phone')
+  
+  // Sign In state
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [isOtpSent, setIsOtpSent] = useState(false)
+  
+  // Sign Up state
+  const [fullName, setFullName] = useState('')
+  const [nickname, setNickname] = useState('')
+  const [email, setEmail] = useState('')
+  const [address, setAddress] = useState('')
+  const [signupPhone, setSignupPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -70,6 +83,31 @@ export function AuthView() {
     }
   }
 
+  const handleSignUp = async () => {
+    if (!fullName || !email || !signupPhone || !password) {
+      setError('Please fill in all required fields')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+    setIsLoading(true)
+    setError('')
+    try {
+      await register(fullName, email, signupPhone, password, nickname || undefined, address || undefined)
+      router.push('/dashboard')
+    } catch (err) {
+      setError('Failed to create account')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4">
       {/* Background elements */}
@@ -87,6 +125,36 @@ export function AuthView() {
               WAKASAFE
             </h1>
             <p className="text-slate-400">{t('welcome')}</p>
+          </div>
+
+          {/* Sign In / Sign Up Toggle */}
+          <div className="flex gap-2 bg-slate-800/40 p-1 rounded-lg border border-slate-700/30">
+            <button
+              onClick={() => {
+                setAuthMode('signin')
+                setError('')
+              }}
+              className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+                authMode === 'signin'
+                  ? 'bg-green-600 text-white'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                setAuthMode('signup')
+                setError('')
+              }}
+              className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+                authMode === 'signup'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Sign Up
+            </button>
           </div>
 
           {/* User Type Selection */}
@@ -117,17 +185,18 @@ export function AuthView() {
           </div>
 
           {/* Auth Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-slate-800/40 border border-slate-700/30">
-              <TabsTrigger value="phone" className="text-xs">
-                <Phone className="w-4 h-4 mr-2" />
-                Phone
-              </TabsTrigger>
-              <TabsTrigger value="google" className="text-xs">
-                <Mail className="w-4 h-4 mr-2" />
-                Google
-              </TabsTrigger>
-            </TabsList>
+          {authMode === 'signin' ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-slate-800/40 border border-slate-700/30">
+                <TabsTrigger value="phone" className="text-xs">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Phone
+                </TabsTrigger>
+                <TabsTrigger value="google" className="text-xs">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Google
+                </TabsTrigger>
+              </TabsList>
 
             {/* Phone Tab */}
             <TabsContent value="phone" className="space-y-4 mt-6">
@@ -217,7 +286,110 @@ export function AuthView() {
                 )}
               </Button>
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          ) : (
+            /* Sign Up Form */
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Full Name *</label>
+                <Input
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Nickname (Optional)</label>
+                <Input
+                  type="text"
+                  placeholder="JD"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Email Address *</label>
+                <Input
+                  type="email"
+                  placeholder="john@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Home Address</label>
+                <Input
+                  type="text"
+                  placeholder="123 Main Street, Aba"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Phone Number *</label>
+                <Input
+                  type="tel"
+                  placeholder="+234..."
+                  value={signupPhone}
+                  onChange={(e) => setSignupPhone(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Password *</label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Confirm Password *</label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600"
+                />
+              </div>
+
+              <Button
+                onClick={handleSignUp}
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Account
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </Button>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
