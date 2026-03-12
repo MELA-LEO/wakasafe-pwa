@@ -192,41 +192,43 @@ export function AuthView() {
 
               <TabsContent value="phone" className="space-y-4">
                 {isOtpSent ? (
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-300">Enter OTP code</label>
-                    <Input
-                      type="text"
-                      placeholder="000000"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.slice(0, 6))}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-slate-300">Enter OTP code</label>
+                      <Input
+                        type="text"
+                        placeholder="000000"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.slice(0, 6))}
+                        disabled={isLoading}
+                        maxLength={6}
+                        className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600 text-center text-lg tracking-widest"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleVerifyOTP}
                       disabled={isLoading}
-                      maxLength={6}
-                      className="bg-slate-900/50 border-slate-700/50 text-white placeholder-slate-600 text-center text-lg tracking-widest"
-                    />
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        'Verify OTP'
+                      )}
+                    </Button>
+                    <button
+                      onClick={() => {
+                        setIsOtpSent(false)
+                        setOtp('')
+                      }}
+                      className="w-full text-sm text-blue-400 hover:text-blue-300"
+                    >
+                      Back to phone number
+                    </button>
                   </div>
-                  <Button
-                    onClick={handleVerifyOTP}
-                    disabled={isLoading}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      'Verify OTP'
-                    )}
-                  </Button>
-                  <button
-                    onClick={() => {
-                      setIsOtpSent(false)
-                      setOtp('')
-                    }}
-                    className="w-full text-sm text-blue-400 hover:text-blue-300"
-                  >
-                    Back to phone number
-                  </button>
                 </>
               )}
             </TabsContent>
