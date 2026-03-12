@@ -55,6 +55,32 @@ export function MapView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>()
+  const [userLocation, setUserLocation] = useRef<{ lat: number; lng: number } | null>(null)
+  const [isLocating, setIsLocating] = useRef(false)
+
+  // Get user's current location
+  const handleLocateMe = () => {
+    if (isLocating.current) return
+    isLocating.current = true
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords
+          userLocation.current = { lat: latitude, lng: longitude }
+          isLocating.current = false
+          // Trigger re-render by forcing animation frame
+          if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current)
+            animationRef.current = requestAnimationFrame(render)
+          }
+        },
+        () => {
+          isLocating.current = false
+        }
+      )
+    }
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -163,6 +189,30 @@ export function MapView() {
       ctx.arc(centerCoords.x, centerCoords.y, 8, 0, Math.PI * 2)
       ctx.fill()
 
+      // User location marker
+      if (userLocation.current) {
+        const userCoords = latLngToCanvasCoords(userLocation.current.lat, userLocation.current.lng, width, height)
+        
+        // Pulsing glow effect
+        const now = Date.now()
+        const pulse = Math.sin((now % 2000) / 2000 * Math.PI) * 0.5 + 0.5
+        ctx.fillStyle = '#06b6d4'
+        ctx.globalAlpha = 0.2 * pulse
+        ctx.beginPath()
+        ctx.arc(userCoords.x, userCoords.y, 25, 0, Math.PI * 2)
+        ctx.fill()
+
+        // User marker circle
+        ctx.globalAlpha = 1
+        ctx.fillStyle = '#06b6d4'
+        ctx.strokeStyle = '#ffffff'
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.arc(userCoords.x, userCoords.y, 8, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+      }
+
       // Incident markers
       incidents.forEach((incident) => {
         const coords = latLngToCanvasCoords(incident.lat, incident.lng, width, height)
@@ -224,6 +274,16 @@ export function MapView() {
   return (
     <div ref={containerRef} className="relative w-full h-full bg-slate-900 rounded-xl overflow-hidden">
       <canvas ref={canvasRef} className="w-full h-full block" />
+
+      {/* Locate Me Button */}
+      <button
+        onClick={handleLocateMe}
+        className="absolute bottom-20 right-4 z-30 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all"
+        aria-label="Locate me"
+        title="Show my location"
+      >
+        <MapPin className="w-5 h-5" />
+      </button>
 
       {/* Map Legend */}
       <div className="absolute bottom-4 left-4 glass-dark rounded-lg p-4 text-xs max-w-xs">

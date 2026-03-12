@@ -9,7 +9,7 @@ import { MapView } from './map-view'
 import { WakaSheet } from './waka-sheet'
 import { SOSButton } from './sos-button'
 import { ReportGrid } from './report-grid'
-import { RouteAdvice } from './route-advice'
+import { RouteAdvisor } from './route-advisor'
 import { LanguageSwitcher } from './language-switcher'
 import { Button } from '@/components/ui/button'
 import { Menu, LogOut, User, Settings } from 'lucide-react'
@@ -126,8 +126,8 @@ export function Dashboard() {
             {/* Report Grid */}
             <ReportGrid />
 
-            {/* Route Advice */}
-            <RouteAdvice />
+            {/* Route Advisor */}
+            <RouteAdvisor />
 
             {/* SOS Button */}
             <SOSButton />
