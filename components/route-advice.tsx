@@ -35,7 +35,7 @@ interface Route {
 export function RouteAdvice() {
   const { t } = useLanguage()
   const { highways } = useMap()
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
   const [fromCity, setFromCity] = useState('Aba')
   const [toCity, setToCity] = useState('Onitsha')
   const [showFromDropdown, setShowFromDropdown] = useState(false)

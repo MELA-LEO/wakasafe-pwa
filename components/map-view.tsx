@@ -13,7 +13,7 @@ const JUNCTIONS = [
   { lat: 5.15, lng: 7.35, name: 'Port Harcourt Junction' },
   { lat: 5.08, lng: 7.38, name: 'Onitsha Road' },
   { lat: 5.12, lng: 7.32, name: 'Umuahia Junction' },
-  { lat: 5.05, lng: 7.40, name: 'Okigwe Interchange' },
+  { lat: 5.05, lng: 7.40, name: 'Okigwe express rounabout' },
   { lat: 5.20, lng: 7.30, name: 'Uturu Bypass' },
 ]
 
@@ -254,3 +254,66 @@ export function MapView() {
     </div>
   )
 }
+
+// 'use client'
+
+// import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
+// import L from "leaflet"
+// import { useMap } from "@/lib/map-context"
+
+// const ABA_CENTER: [number, number] = [5.1098, 7.3667]
+
+// export function MapView() {
+//   const { incidents, highways, selectIncident } = useMap()
+
+//   return (
+//     <div className="relative w-full h-full bg-slate-900 rounded-xl overflow-hidden">
+
+//       <MapContainer
+//         center={ABA_CENTER}
+//         zoom={11}
+//         className="w-full h-full"
+//       >
+//         <TileLayer
+//           attribution='© OpenStreetMap'
+//           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+//         />
+
+//         {/* Highways */}
+//         {highways.map((highway, i) => (
+//           <Polyline
+//             key={i}
+//             positions={highway.coordinates.map(([lng, lat]) => [lat, lng])}
+//             pathOptions={{
+//               color:
+//                 highway.status === "danger"
+//                   ? "red"
+//                   : highway.status === "caution"
+//                   ? "yellow"
+//                   : "green",
+//               weight: 5
+//             }}
+//           />
+//         ))}
+
+//         {/* Incidents */}
+//         {incidents.map((incident, i) => (
+//           <Marker
+//             key={i}
+//             position={[incident.lat, incident.lng]}
+//             eventHandlers={{
+//               click: () => selectIncident(incident)
+//             }}
+//           >
+//             <Popup>
+//               <strong>{incident.type}</strong><br />
+//               Severity: {incident.severity}
+//             </Popup>
+//           </Marker>
+//         ))}
+
+//       </MapContainer>
+
+//     </div>
+//   )
+// }
